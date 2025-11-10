@@ -111,6 +111,24 @@
         </div>
         <span class="tip setting-help">{% trans is_scorable.help %}</span>
       </li>
+
+      <li class="field comp-setting-entry is-set">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label" for="xb_field_mark_completion_on_open">{% trans mark_completion_on_open.display_name %}</label>
+          <select class="field-data-control"
+                  id="xb_field_edit_mark_completion_on_open"
+                >
+                  <option value="1" {% if h5p_xblock.mark_completion_on_open %}selected{% endif %}>
+                    {% trans "True" %}{% if mark_completion_on_open.default %}&nbsp;&nbsp;&nbsp;&nbsp;{% trans "(Default)" %}{% endif %}
+                  </option>
+                  <option value="0" {% if not h5p_xblock.mark_completion_on_open %}selected{% endif %}>
+                    {% trans "False" %}{% if not mark_completion_on_open.default %}&nbsp;&nbsp;&nbsp;&nbsp;{% trans "(Default)" %}{% endif %}
+                  </option>
+          </select>
+        </div>
+        <span class="tip setting-help">{% trans mark_completion_on_open.help %}</span>
+      </li>
+
       <li class="field comp-setting-entry is-set scorable">
         <div class="wrapper-comp-setting">
           <label class="label setting-label" for="xb_weight">{% trans weight.display_name %}</label>

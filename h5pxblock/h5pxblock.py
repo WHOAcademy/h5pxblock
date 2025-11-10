@@ -169,6 +169,13 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         scope=Scope.user_state,
     )
 
+    mark_completion_on_open = Boolean(
+        default=False,
+        scope=Scope.settings,
+        display_name=_("Mark Completion On Opening"),
+        help=_("Automatically mark this block as completed when content is loaded.")
+    )
+
     h5p_content_meta = Dict(scope=Scope.content)
     has_author_view = True
 
@@ -239,6 +246,7 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
             "weight": self.fields["weight"],
             "points": self.fields["points"],
             "h5p_xblock": self,
+            "mark_completion_on_open": self.fields["mark_completion_on_open"],
         }
 
     def author_view(self, context=None):
@@ -291,7 +299,8 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
                 "user_email": user.emails[0],
                 "userData": self.interaction_data,
                 "customJsPath": self.runtime.local_resource_url(self, "public/js/h5pcustom.js"),
-                "h5pJsonPath": self.h5p_content_json_path
+                "h5pJsonPath": self.h5p_content_json_path,
+                "mark_completion_on_open": self.mark_completion_on_open,
             }
         )
         return frag
@@ -324,6 +333,7 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         points = request.params["points"]
         weight = request.params["weight"]
         self.points, self.weight = self.validate_score(points, weight)
+        self.mark_completion_on_open = str2bool(request.params["mark_completion_on_open"])
 
         if hasattr(request.params["h5p_content_bundle"], "file"):
             h5p_package = request.params["h5p_content_bundle"].file
