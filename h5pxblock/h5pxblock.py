@@ -169,11 +169,15 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         scope=Scope.user_state,
     )
 
+    # settings to automatically mark this block as completed when content is loaded if it's true.
     mark_completion_on_open = Boolean(
         default=False,
         scope=Scope.settings,
         display_name=_("Mark Completion On Opening"),
-        help=_("Automatically mark this block as completed when content is loaded.")
+        help=_(
+            "Set to True for non-interactive or reading-only content to record progress on opening. "
+            "Leave False for interactive activities, which mark completion only after learner engagement."
+        )
     )
 
     h5p_content_meta = Dict(scope=Scope.content)

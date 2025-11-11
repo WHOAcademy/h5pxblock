@@ -33,7 +33,8 @@ function H5PPlayerXBlock(runtime, element, args) {
                 $(el).siblings('.spinner-container').find('.spinner-border').hide();
                 $(el).show();
 
-                // ✅ Auto-mark completion if enabled in Studio
+                // Auto-mark completion if enabled in Studio
+                // Source for verb: https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#verbs
                 if (args.mark_completion_on_open === true) {
                     $.ajax({
                         type: "POST",
