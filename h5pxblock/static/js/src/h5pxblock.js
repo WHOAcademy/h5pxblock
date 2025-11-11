@@ -31,7 +31,25 @@ function H5PPlayerXBlock(runtime, element, args) {
 
             return new H5PStandalone.H5P(el, options).then(function(){ 
                 $(el).siblings('.spinner-container').find('.spinner-border').hide();
-                $(el).show();        
+                $(el).show();
+
+                // Auto-mark completion if enabled in Studio
+                // Source for verb: https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#verbs
+                if (args.mark_completion_on_open === true) {
+                    $.ajax({
+                        type: "POST",
+                        url: contentxResultSaveUrl,
+                        data: JSON.stringify({
+                            verb: {
+                                id: "http://adlnet.gov/expapi/verbs/experienced",
+                                display: {"en-US": "experienced"}
+                            },
+                            result: { completion: true }
+                        })
+                    });
+                }
+
+
                 H5P.externalDispatcher.on("xAPI", (event) => {
 
                     let hasStatement = event && event.data && event.data.statement;
