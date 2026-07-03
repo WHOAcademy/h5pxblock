@@ -77,6 +77,23 @@ function H5PPlayerXBlock(runtime, element, args) {
         $(h5pel).siblings(".spinner-container").find(".spinner-border").hide();
         $(h5pel).show();
 
+        if (args.mark_completion_on_open === true) {
+          $.ajax({
+            type: "POST",
+            url: contentxResultSaveUrl,
+            data: JSON.stringify({
+              verb: {
+                id: "http://adlnet.gov/expapi/verbs/experienced",
+                display: { "en-US": "experienced" },
+              },
+              result: {
+                completion: true,
+                score: null,
+              },
+            }),
+          });
+        }
+
         H5P.externalDispatcher.on("xAPI", (event) => {
           let hasStatement = event && event.data && event.data.statement;
           if (!hasStatement) {

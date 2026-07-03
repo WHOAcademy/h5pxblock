@@ -179,6 +179,16 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         scope=Scope.user_state,
     )
 
+    mark_completion_on_open = Boolean(
+        display_name=_("Mark Completion On Opening"),
+        help=_(
+            "Set to True for non-interactive or reading-only content to record progress on opening. "
+            "Leave False for interactive activities, which mark completion only after learner engagement."
+        ),
+        default=False,
+        scope=Scope.settings,
+    )
+
     h5p_content_meta = Dict(scope=Scope.content)
 
     def resource_string(self, path):
@@ -250,6 +260,7 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
             "save_freq": self.fields["save_freq"],
             "weight": self.fields["weight"],
             "points": self.fields["points"],
+            "mark_completion_on_open": self.fields["mark_completion_on_open"],
             "h5p_xblock": self,
         }
 
@@ -299,7 +310,8 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
                 "user_email": user.emails[0],
                 "userData": self.interaction_data,
                 "customJsPath": self.runtime.local_resource_url(self, "public/js/h5pcustom.js"),
-                "h5pJsonPath": self.h5p_content_json_path
+                "h5pJsonPath": self.h5p_content_json_path,
+                "mark_completion_on_open": self.mark_completion_on_open,
             }
         )
         return frag
@@ -332,6 +344,7 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         points = request.params["points"]
         weight = request.params["weight"]
         self.points, self.weight = self.validate_score(points, weight)
+        self.mark_completion_on_open = str2bool(request.params["mark_completion_on_open"])
 
         if hasattr(request.params["h5p_content_bundle"], "file"):
             h5p_package = request.params["h5p_content_bundle"].file
