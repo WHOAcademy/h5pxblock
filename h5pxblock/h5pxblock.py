@@ -285,7 +285,24 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         template = self.render_template("static/html/h5pxblock.html", context)
         frag = Fragment(template)
         frag.add_css(self.resource_string("static/css/student_view.css"))
-        frag.add_javascript_url('https://cdn.jsdelivr.net/npm/h5p-standalone@3.6.0/dist/main.bundle.js')
+
+        # Bundle h5p-standalone with the XBlock instead of loading it from a CDN.
+        # Keeping the complete dist directory is important because h5p.css uses
+        # relative URLs for H5P theme fonts and images.
+        player_main_js = self.runtime.local_resource_url(
+            self,
+            "public/vendor/h5p-standalone/main.bundle.js",
+        )
+        frame_js = self.runtime.local_resource_url(
+            self,
+            "public/vendor/h5p-standalone/frame.bundle.js",
+        )
+        frame_css = self.runtime.local_resource_url(
+            self,
+            "public/vendor/h5p-standalone/styles/h5p.css",
+        )
+
+        frag.add_javascript_url(player_main_js)
         frag.add_javascript(self.resource_string("static/js/src/h5pxblock.js"))
         user_service = self.runtime.service(self, 'user')
         user = user_service.get_current_user()
@@ -303,6 +320,8 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
                 "user_email": user.emails[0],
                 "userData": self.interaction_data,
                 "customJsPath": self.runtime.local_resource_url(self, "public/js/h5pcustom.js"),
+                "frameJsPath": frame_js,
+                "frameCssPath": frame_css,
                 "h5pJsonPath": self.h5p_content_json_path,
                 "mark_completion_on_open": self.mark_completion_on_open,
             }

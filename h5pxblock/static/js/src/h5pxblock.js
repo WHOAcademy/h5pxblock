@@ -12,8 +12,8 @@ function H5PPlayerXBlock(runtime, element, args) {
             const userObj = { 'name': args.user_full_name, 'mail': args.user_email };
             const options = {
                 h5pJsonPath: args.h5pJsonPath,
-                frameJs: 'https://cdn.jsdelivr.net/npm/h5p-standalone@3.6.0/dist/frame.bundle.js',
-                frameCss: 'https://cdn.jsdelivr.net/npm/h5p-standalone@3.6.0/dist/styles/h5p.css',
+                frameJs: args.frameJsPath,
+                frameCss: args.frameCssPath,
                 frame: args.frame,
                 copyright: args.copyright,
                 icon: args.icon,
