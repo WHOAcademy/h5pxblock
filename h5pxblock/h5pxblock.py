@@ -292,8 +292,9 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
         template = self.render_template("static/html/h5pxblock.html", context)
         frag = Fragment(template)
         frag.add_css(self.resource_string("static/css/student_view.css"))
-        frag.add_javascript(self.resource_string("static/js/src/installRequired.js"))
         frag.add_javascript(self.resource_string("static/js/src/h5pxblock.js"))
+        # Bundled h5p-standalone; the full dist is kept for the fonts and images h5p.css references.
+        h5p_standalone = "public/vendor/h5p-standalone/"
         user_service = self.runtime.service(self, 'user')
         user = user_service.get_current_user()
         save_freq = self.save_freq if self.save_freq > 0 else False
@@ -310,6 +311,9 @@ class H5PPlayerXBlock(XBlock, CompletableXBlockMixin):
                 "user_email": user.emails[0],
                 "userData": self.interaction_data,
                 "customJsPath": self.runtime.local_resource_url(self, "public/js/h5pcustom.js"),
+                "mainJsPath": self.runtime.local_resource_url(self, h5p_standalone + "main.bundle.js"),
+                "frameJsPath": self.runtime.local_resource_url(self, h5p_standalone + "frame.bundle.js"),
+                "frameCssPath": self.runtime.local_resource_url(self, h5p_standalone + "styles/h5p.css"),
                 "h5pJsonPath": self.h5p_content_json_path,
                 "mark_completion_on_open": self.mark_completion_on_open,
             }

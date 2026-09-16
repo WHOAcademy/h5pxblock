@@ -27,6 +27,10 @@ function H5PPlayerXBlock(runtime, element, args) {
   
   async function initH5PBlock(runtime, element, args) {
     if (typeof require === "function") {
+      // Point RequireJS at the bundled player. RequireJS adds ".js" itself.
+      require.config({
+        paths: { h5p: args.mainJsPath.replace(/\.js$/, "") },
+      });
       return new Promise((resolve) => {
         require(["h5p"], function (H5PStandalone) {
           initWithH5P(H5PStandalone, "cms", runtime, element, args)
@@ -34,7 +38,7 @@ function H5PPlayerXBlock(runtime, element, args) {
         });
       });
     } else {
-      await loadJS();
+      await loadJS(args.mainJsPath);
       return initWithH5P(window.H5PStandalone, "lms", runtime, element, args);
     }
   }
@@ -51,10 +55,8 @@ function H5PPlayerXBlock(runtime, element, args) {
       const userObj = { name: args.user_full_name, mail: args.user_email };
       const options = {
         h5pJsonPath: args.h5pJsonPath,
-        frameJs:
-          "https://cdn.jsdelivr.net/npm/h5p-standalone@3.7.0/dist/frame.bundle.js",
-        frameCss:
-          "https://cdn.jsdelivr.net/npm/h5p-standalone@3.7.0/dist/styles/h5p.css",
+        frameJs: args.frameJsPath,
+        frameCss: args.frameCssPath,
         frame: args.frame,
         copyright: args.copyright,
         icon: args.icon,
@@ -73,7 +75,7 @@ function H5PPlayerXBlock(runtime, element, args) {
       };
 
       try {
-        await new H5PStandalone.H5P(h5pel, options);
+        await createH5PPlayer(H5PStandalone, h5pel, options);
         $(h5pel).siblings(".spinner-container").find(".spinner-border").hide();
         $(h5pel).show();
 
@@ -144,15 +146,39 @@ function H5PPlayerXBlock(runtime, element, args) {
   }
 }
 
-function loadJS() {
+// Studio loads RequireJS globally, so the UMD header of h5p-standalone's
+// frame.bundle.js registers a module instead of starting the H5P core.
+// While the player loads, run scripts it added (marked with data-h5p)
+// directly and pass every other define() call to RequireJS unchanged.
+async function createH5PPlayer(H5PStandalone, el, options) {
+  const requireDefine = window.define;
+  const hasGlobalRequireJS = Boolean(requireDefine && requireDefine.amd);
+  if (hasGlobalRequireJS) {
+    window.define = function (...defineArgs) {
+      const script = document.currentScript;
+      if (script && script.dataset.h5p) {
+        return defineArgs[defineArgs.length - 1]();
+      }
+      return requireDefine.apply(this, defineArgs);
+    };
+    window.define.amd = requireDefine.amd;
+  }
+  try {
+    return await new H5PStandalone.H5P(el, options);
+  } finally {
+    if (hasGlobalRequireJS) {
+      window.define = requireDefine;
+    }
+  }
+}
+
+function loadJS(src) {
   return new Promise((resolve) => {
     if (window.H5PStandalone) {
       resolve();
     } else {
-      // Load H5PStandalone dynamically using $.getScript
-      $.getScript(
-        "https://cdn.jsdelivr.net/npm/h5p-standalone@3.7.0/dist/main.bundle.js"
-      )
+      // Load the bundled H5PStandalone dynamically using $.getScript
+      $.getScript(src)
         .done(function () {
           window.H5PStandalone = H5PStandalone;
           resolve();
