@@ -83,6 +83,7 @@ function H5PPlayerXBlock(runtime, element, args) {
           $.ajax({
             type: "POST",
             url: contentxResultSaveUrl,
+            contentType: "application/json",
             data: JSON.stringify({
               verb: {
                 id: "http://adlnet.gov/expapi/verbs/experienced",
@@ -127,6 +128,7 @@ function H5PPlayerXBlock(runtime, element, args) {
             $.ajax({
               type: "POST",
               url: contentxResultSaveUrl,
+              contentType: "application/json",
               data: JSON.stringify(event.data.statement),
             })
             .done(function () {
